@@ -41,10 +41,13 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     trajectory =
         TrajectoryGenerator.generateTrajectory(
-            new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-            List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
-            new Pose2d(3, 0, Rotation2d.fromDegrees(0)),
-            new TrajectoryConfig(Units.feetToMeters(3.0), Units.feetToMeters(3.0)));
+          new Pose2d(0, 0, new Rotation2d(0)),
+          List.of(
+              new Translation2d(1, 1),
+              new Translation2d(2, 1)
+          ),
+          new Pose2d(3, 0, new Rotation2d(0)),
+            new TrajectoryConfig(Units.feetToMeters(2.0), Units.feetToMeters(1.0)));
 
     drivetrain.plotTrajectory(trajectory);
   }
