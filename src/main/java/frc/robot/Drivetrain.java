@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.ArrayList;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.InvertType;
@@ -29,6 +31,7 @@ import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.util.Units;
 
 public class Drivetrain {
@@ -171,6 +174,16 @@ public class Drivetrain {
 
   public Pose2d getPose() {
     return odometry.getPoseMeters();
+  }
+
+  public void plotTrajectory(Trajectory trajectory) {
+      ArrayList<Pose2d> poses = new ArrayList<>();
+
+      for (Trajectory.State pose : trajectory.getStates()) {
+        poses.add(pose.poseMeters);
+      }
+
+      field.getObject("foo").setPoses(poses);
   }
 
   // TODO investigate if the math here is right

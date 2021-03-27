@@ -45,6 +45,8 @@ public class Robot extends TimedRobot {
             List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
             new Pose2d(3, 0, Rotation2d.fromDegrees(0)),
             new TrajectoryConfig(Units.feetToMeters(3.0), Units.feetToMeters(3.0)));
+
+    drivetrain.plotTrajectory(trajectory);
   }
 
   @Override
