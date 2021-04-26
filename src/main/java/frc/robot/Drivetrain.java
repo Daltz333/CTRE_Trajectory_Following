@@ -67,13 +67,13 @@ public class Drivetrain {
   private DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(gyro.getRotation2d());
 
   // left and right pid controller for wheel speeds
-  private final PIDController leftPIDController = new PIDController(1, 0, 0);
-  private final PIDController rightPIDController = new PIDController(1, 0, 0);
+  private final PIDController leftPIDController = new PIDController(0.3, 0, 0);
+  private final PIDController rightPIDController = new PIDController(0.3, 0, 0);
 
   private final DifferentialDriveKinematics kinematics =
       new DifferentialDriveKinematics(Constants.kTrackWidthMeters);
 
-  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(1, 3);
+  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.2, 0.5);
 
   SimDouble gyroSim =
       new SimDouble(
