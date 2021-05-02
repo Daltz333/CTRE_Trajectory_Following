@@ -9,18 +9,10 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.controller.RamseteController;
-import edu.wpi.first.wpilibj.geometry.Pose2d;
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
-import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
-import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
-import edu.wpi.first.wpilibj.util.Units;
-
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -45,7 +37,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    String trajectoryJson = "Barrel Racing.wpilib.json";
+    String trajectoryJson = "Unnamed.wpilib.json";
 
     try {
       Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJson);
@@ -80,7 +72,7 @@ public class Robot extends TimedRobot {
       var refChassisSpeeds = ramseteController.calculate(drivetrain.getPose(), desiredPose);
 
       // Set the linear and angular speeds.
-      drivetrain.drive(refChassisSpeeds.vxMetersPerSecond, refChassisSpeeds.omegaRadiansPerSecond);
+      drivetrain.drive(refChassisSpeeds.vxMetersPerSecond, -refChassisSpeeds.omegaRadiansPerSecond);
     } else {
       drivetrain.drive(0, 0);
     }
@@ -108,6 +100,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void simulationPeriodic() {
+    System.out.println("Running in Sim");
     drivetrain.simulationPeriodic();
   }
 }

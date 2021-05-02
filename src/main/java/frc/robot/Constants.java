@@ -20,9 +20,15 @@ public class Constants {
   public static final double kCountsPerRev =
       4096; // Encoder counts per revolution of the motor shaft.
   public static final double k100msPerSecond = 10;
-  public static final double kGearRatio = 5.64;
+  public static final double kGearRatio = 5.4;
   public static final double kMagMultiplier =
       ((kCountsPerRev * kGearRatio) / (Math.PI * (kWheelRadiusInches * 2)));
 
   public static final double kTrackWidthMeters = 0.546;
+
+  public static final double kS = 1.6993;
+  public static final double kV = 2.2741;
+  public static final double kA = 1.1605;
+
+  public static final double kP = 3.864;
 }

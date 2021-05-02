@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import java.util.ArrayList;
-
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.InvertType;
@@ -22,6 +20,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
@@ -33,6 +32,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.util.Units;
+import java.util.ArrayList;
 
 public class Drivetrain {
   // create our motor controller objects, ensure they are the WPI variant for DriveSim compatibility
@@ -67,13 +67,13 @@ public class Drivetrain {
   private DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(gyro.getRotation2d());
 
   // left and right pid controller for wheel speeds
-  private final PIDController leftPIDController = new PIDController(0.3, 0, 0);
-  private final PIDController rightPIDController = new PIDController(0.3, 0, 0);
+  private final PIDController leftPIDController = new PIDController(Constants.kP, 0, 0);
+  private final PIDController rightPIDController = new PIDController(Constants.kP, 0, 0);
 
   private final DifferentialDriveKinematics kinematics =
       new DifferentialDriveKinematics(Constants.kTrackWidthMeters);
 
-  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.2, 0.5);
+  private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Constants.kS, Constants.kV);
 
   SimDouble gyroSim =
       new SimDouble(
@@ -103,6 +103,7 @@ public class Drivetrain {
     motorLeftMaster.setSelectedSensorPosition(0);
     motorRightMaster.setSelectedSensorPosition(0);
 
+    gyro.calibrate();
     gyro.reset();
 
     Shuffleboard.getTab("Simulation").add(field);
@@ -110,7 +111,7 @@ public class Drivetrain {
     // invert right side only on real robot, as simulation expects both side positive
     if (RobotBase.isReal()) {
       motorRightMaster.setInverted(InvertType.InvertMotorOutput);
-      motorRightMaster.setSensorPhase(true);
+      motorRightMaster.setSensorPhase(false);
 
     } else {
       motorRightMaster.setInverted(InvertType.None);
@@ -120,12 +121,22 @@ public class Drivetrain {
 
   // update our drivetrain location
   public void periodic() {
+
+    var leftMeters = Units.inchesToMeters(motorLeftMaster.getSelectedSensorPosition() / Constants.kMagMultiplier);
+    var rightMeters = Units.inchesToMeters(motorRightMaster.getSelectedSensorPosition() / Constants.kMagMultiplier);
+    
+    SmartDashboard.putNumber("Left Meters", leftMeters);
+    SmartDashboard.putNumber("Right Meters", rightMeters);
+
     odometry.update(
-        gyro.getRotation2d(),
-        CTREUtil.nativeUnitsToDistanceMeters(motorLeftMaster.getSelectedSensorPosition()),
-        CTREUtil.nativeUnitsToDistanceMeters(motorRightMaster.getSelectedSensorPosition()));
+        new Rotation2d(-Units.degreesToRadians(gyro.getAngle())),
+        leftMeters,
+        rightMeters); 
 
     field.setRobotPose(odometry.getPoseMeters());
+
+    SmartDashboard.putNumber("Pose Forward (X)", odometry.getPoseMeters().getX());
+    SmartDashboard.putNumber("Pose Sideways (Y)", odometry.getPoseMeters().getY());
 
     // debug information
     SmartDashboard.putNumber("Left Master Voltage", motorLeftMaster.getMotorOutputVoltage());
@@ -135,11 +146,11 @@ public class Drivetrain {
 
     SmartDashboard.putNumber(
         "Left Master Velocity",
-        CTREUtil.velocityToNativeUnits(motorLeftMaster.getSelectedSensorVelocity()));
+        getLeftVelocityMeters());
 
     SmartDashboard.putNumber(
         "Right Master Velocity",
-        CTREUtil.velocityToNativeUnits(motorRightMaster.getSelectedSensorVelocity()));
+        getRightVelocityMeters());
   }
 
   // periodically called during simulation
@@ -177,13 +188,13 @@ public class Drivetrain {
   }
 
   public void plotTrajectory(Trajectory trajectory) {
-      ArrayList<Pose2d> poses = new ArrayList<>();
+    ArrayList<Pose2d> poses = new ArrayList<>();
 
-      for (Trajectory.State pose : trajectory.getStates()) {
-        poses.add(pose.poseMeters);
-      }
+    for (Trajectory.State pose : trajectory.getStates()) {
+      poses.add(pose.poseMeters);
+    }
 
-      field.getObject("foo").setPoses(poses);
+    field.getObject("foo").setPoses(poses);
   }
 
   // TODO investigate if the math here is right
@@ -219,7 +230,7 @@ public class Drivetrain {
 
     motorLeftMaster.set(ControlMode.PercentOutput, throttle, DemandType.ArbitraryFeedForward, turn);
     motorRightMaster.set(
-        ControlMode.PercentOutput, throttle, DemandType.ArbitraryFeedForward, -turn);
+        ControlMode.PercentOutput, throttle, DemandType.ArbitraryFeedForward, turn);
   }
 
   // trajectory following drive function
