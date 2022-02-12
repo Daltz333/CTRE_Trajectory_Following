@@ -12,26 +12,25 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.hal.SimDouble;
 import edu.wpi.first.hal.simulation.SimDeviceDataJNI;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.controller.PIDController;
-import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
-import edu.wpi.first.wpilibj.geometry.Pose2d;
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
-import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
-import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.trajectory.Trajectory;
-import edu.wpi.first.wpilibj.util.Units;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.util.Units;
 import java.util.ArrayList;
 
 public class Drivetrain {
@@ -128,8 +127,13 @@ public class Drivetrain {
     SmartDashboard.putNumber("Left Meters", leftMeters);
     SmartDashboard.putNumber("Right Meters", rightMeters);
 
+    double angle = -Units.degreesToRadians(gyro.getAngle());
+
+    if (RobotBase.isSimulation()) {
+      angle = Units.degreesToRadians(gyro.getAngle());
+    }
     odometry.update(
-        new Rotation2d(-Units.degreesToRadians(gyro.getAngle())),
+        new Rotation2d(angle),
         leftMeters,
         rightMeters); 
 
@@ -222,8 +226,8 @@ public class Drivetrain {
 
   // normal teleop drive function
   public void drive() {
-    double throttle = -driver.getY(Hand.kLeft); // invert our y due to joystick convention
-    double turn = driver.getX(Hand.kRight);
+    double throttle = -driver.getLeftY(); // invert our y due to joystick convention
+    double turn = driver.getRightX();
 
     SmartDashboard.putNumber("Controller Throttle", throttle);
     SmartDashboard.putNumber("Controller Turn", turn);

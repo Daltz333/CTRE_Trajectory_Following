@@ -4,7 +4,7 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.util.Units;
+import edu.wpi.first.math.util.Units;
 
 public class CTREUtil {
   public static int distanceToNativeUnits(double positionMeters) {
